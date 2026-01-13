@@ -11,6 +11,11 @@ bases:
 commonLabels:
   environment: dev
 
+images:
+  - name: ghcr.io/nguyendang52/gitops-demo-app
+    newName: ghcr.io/nguyendang52/gitops-demo-app-dev
+    newTag: latest
+
 patches:
   - target:
       kind: Deployment

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: gitops-demo-app
-        image: ghcr.io/nguyendang52/gitops-demo-app:latest
+        image: ghcr.io/nguyendang52/gitops-demo-app:placeholder
         ports:
         - containerPort: 3000
           name: http
