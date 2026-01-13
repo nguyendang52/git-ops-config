@@ -13,7 +13,6 @@ commonLabels:
 
 images:
   - name: ghcr.io/nguyendang52/gitops-demo-app
-    newName: ghcr.io/nguyendang52/gitops-demo-app-dev
     newTag: latest
 
 patches:
