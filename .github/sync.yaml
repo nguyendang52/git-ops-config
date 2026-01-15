@@ -1,0 +1,69 @@
+name: Sync Image Tag and Trigger ArgoCD Sync
+
+on:
+  workflow_call:
+    inputs:
+      RUNNER:
+        description: 'Runner'
+        type: string
+        required: false
+        default: 'ubuntu-latest'
+      
+      environment:
+        description: 'Environment tag (e.g., dev, test, stage, prod)'
+        type: string
+        required: false
+        default: 'dev'
+      image_name: # Input for image_name
+        description: 'Name of the Docker image'
+        type: string
+        required: true
+      project_id:
+        description: 'Google Cloud Project ID for Artifact Registry'
+        type: string
+        required: true
+    secrets:
+      CONFIG_SSH_TOKEN:
+        required: true
+
+jobs:
+  update-and-sync:
+    name: Update Image Tag
+    runs-on: ["${{ inputs.RUNNER }}"]
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: write
+    outputs:
+      image_url: ${{ steps.set-output.outputs.image_url }}
+
+    steps:
+      - name: Checkout Config Repo
+        uses: actions/checkout@v4
+        with:
+          repository: nguyendang52/git-ops-config
+          ref: main
+          ssh-key: ${{ secrets.CONFIG_SSH_TOKEN }}
+
+      - name: Git Config
+        id: config-git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          echo "date-build=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+
+      - name: Install kustomize
+        run: |
+          curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
+          chmod +x ./kustomize
+          sudo mv ./kustomize /usr/local/bin/kustomize
+
+      - name: Update Image Tag in Kustomization
+        run: |
+          cd k8s/overlays/${{ inputs.environment }}
+          kustomize edit set image ${{ inputs.image_name }}=${{ inputs.image_name }}:${{github.sha}}
+
+      - name: Commit and Push
+        run: |
+          git add k8s/overlays/${{ inputs.environment }}
+          git commit -m "Update image for git-ops-config [${{ inputs.environment }}] date: [${{ steps.config-git.outputs.date-build }}]" || echo "No changes to commit"
+          git push
