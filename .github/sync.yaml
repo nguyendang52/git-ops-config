@@ -60,7 +60,8 @@ jobs:
       - name: Update Image Tag in Kustomization
         run: |
           cd k8s/overlays/${{ inputs.environment }}
-          kustomize edit set image ${{ inputs.image_name }}=${{ inputs.image_name }}:${{github.sha}}
+          COMMIT_HASH=$(git rev-parse --short=8 HEAD)
+          kustomize edit set image ${{ inputs.image_name }}=${{ inputs.image_name }}:${COMMIT_HASH}
 
       - name: Commit and Push
         run: |
