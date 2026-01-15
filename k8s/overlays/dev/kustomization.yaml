@@ -5,27 +5,27 @@ namespace: gitops-demo-dev
 
 namePrefix: dev-
 
-bases:
-  - ../../base
 
 commonLabels:
   environment: dev
 
 images:
-  - name: ghcr.io/nguyendang52/gitops-demo-app
-    newTag: latest
+- name: ghcr.io/nguyendang52/gitops-demo-app
+  newName: ghcr.io/nguyendang52/gitops-demo-app
+  newTag: 23e7b5cf
 
 patches:
-  - target:
-      kind: Deployment
-      name: gitops-demo-app
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-      - op: replace
-        path: /spec/template/spec/containers/0/env/1/value
-        value: development
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 1
+    - op: replace
+      path: /spec/template/spec/containers/0/env/1/value
+      value: development
+  target:
+    kind: Deployment
+    name: gitops-demo-app
 
 resources:
-  - namespace.yaml
+- namespace.yaml
+- ../../base
